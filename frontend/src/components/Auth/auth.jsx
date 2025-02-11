@@ -17,6 +17,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { toast } from "react-hot-toast";
+import { Verified } from "@mui/icons-material";
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -50,6 +51,9 @@ const initialValuesLogin = {
 
 const Auth = () => {
   const [pageType, setPageType] = useState("login");
+  const [enterOTP, setenterOTP] = useState(false);
+  const [otpIsVerified, setOtpIsVerified] = useState(false);
+  const [otp, setotp] = useState("")
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const isLogin = pageType === "login";
@@ -152,8 +156,48 @@ const Auth = () => {
 
   const handleFormSubmit = async (values, onSubmitProps) => {
     if (isLogin) await login(values, onSubmitProps);
-    if (isRegister) await register(values, onSubmitProps);
+    if(isRegister){
+      if (otpIsVerified) {
+        await register(values, onSubmitProps);
+      } else{
+        alert("OTP verification is compulsory.");
+      }
+    } 
   };
+
+  const sendOTP = async (values) => {
+    // Send OTP to the input email via nodemailer.
+    const email = values.email;
+    // console.log(email);
+    const otpSent = await fetch(`${BASE_URL}/auth/sendotp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email
+      }),
+    });
+    // console.log(otpSent);
+    setenterOTP(true);
+  }
+
+  const handleOTP = async (otp,values) => {
+    const otpVerified = await fetch(`${BASE_URL}/auth/verifyOTP`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        otp,
+        email: values.email
+      }),
+    });
+    console.log(otpVerified);
+    if(otpVerified.status === 200){
+      setOtpIsVerified(true);
+      // console.log("otp veified");
+    } else{
+      // console.log("otp not verified");
+      setOtpIsVerified(false);
+    }
+  }
 
   return (
     <div className="container">
@@ -267,6 +311,27 @@ const Auth = () => {
             error={Boolean(touched.password) && Boolean(errors.password)}
             helperText={touched.password && errors.password}
           />
+
+
+
+          {isRegister && (
+            <>
+            {enterOTP && (
+              <>
+              <input type="text" label="otp" name="handleOTP" placeholder="Enter OTP sent on mail" onBlur={handleBlur} onChange={(e)=>setotp(e.currentTarget.value)}/>
+              </>
+            )}
+            <button type="button" style={{marginBottom: "12px", marginTop: "12px"}} onClick={enterOTP ? ()=>handleOTP(otp,values) : ()=>sendOTP(values)}>{enterOTP ? otpIsVerified ? "OTP verified" : "Verify OTP" : "Get OTP"}</button>
+            {/* {otpIsVerified && (
+              <div>
+                <Verified/>
+              </div>
+            )} */}
+            </>
+          )}
+
+
+
           <button type="submit" style={{ backgroundColor: "gray", color: "white" }}>{isLogin ? "LOGIN" : "REGISTER"}</button>
           <button className="link-btn"
             onClick={() => {
