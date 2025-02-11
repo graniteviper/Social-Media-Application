@@ -58,6 +58,8 @@ Ensure you have the following installed:
       MONGO_URL=your_mongodb_connection_string
       JWT_SECRET=your_jwt_secret
       BASE_URL=https://oneworld.onrender.com
+      EMAIL = gmail_used_for_sending_otp_for_verification
+      EMAIL_PASS = App_specific_password_for_nodemailer
 4. **Start the application:**
     - Run the backend server:
       ```bash
