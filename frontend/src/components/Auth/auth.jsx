@@ -160,7 +160,7 @@ const Auth = () => {
       if (otpIsVerified) {
         await register(values, onSubmitProps);
       } else{
-        alert("OTP verification is compulsory.");
+        toast.error("OTP verification is compulsory.");
       }
     } 
   };
@@ -177,6 +177,7 @@ const Auth = () => {
       }),
     });
     // console.log(otpSent);
+    toast.success("OTP Sent!")
     setenterOTP(true);
   }
 
@@ -191,9 +192,11 @@ const Auth = () => {
     });
     console.log(otpVerified);
     if(otpVerified.status === 200){
+      toast.success("otp veified");
       setOtpIsVerified(true);
       // console.log("otp veified");
     } else{
+      toast.error("otp not verified");
       // console.log("otp not verified");
       setOtpIsVerified(false);
     }
